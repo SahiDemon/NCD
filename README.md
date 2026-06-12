@@ -1,6 +1,6 @@
 # Nexus Download Collection (NDC) — Python CLI
 
-An automated downloader for NexusMods collections. This tool provides a workaround for **non-Premium users** to download entire collections directly within Vortex without clicking "slow download" for every single mod.
+An automated downloader for NexusMods collections.
 
 ---
 
