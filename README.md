@@ -1,16 +1,16 @@
 # Nexus Download Collection (NDC) — Python CLI
 
-An automated downloader for NexusMods collections.
+An automated downloader for NexusMods collections. This tool provides a workaround for **non-Premium users** to download entire collections directly within Vortex without clicking "slow download" for every single mod.
 
 ---
 
-##  How to Run
+## 🚀 How to Run
 
 Simply double-click **`Run NDC.bat`** (or run `python ndc.py` in your terminal).
 
 ---
 
-##  Download Modes
+## ⚙️ Download Modes
 
 On first run (or if `ndc_config.json` is deleted), the tool will guide you through a quick setup to set your **API Key**, **Cookie String**, and **Mode**:
 
@@ -26,7 +26,7 @@ On first run (or if `ndc_config.json` is deleted), the tool will guide you throu
 
 ---
 
-##  Step-by-Step Guide for Cookie Mode
+## 🛠️ Step-by-Step Guide for Cookie Mode
 
 To download mods automatically directly inside Vortex:
 
@@ -46,7 +46,7 @@ If Vortex is currently prompting you with download dialogs, click **Cancel** on 
 
 ---
 
-##  Modifying Settings
+## ⚙️ Modifying Settings
 Run the script, select **Option 2 (Settings)** to:
 * Switch between **Cookie** and **API** modes.
 * Re-paste or update your API key / Cookie string.
