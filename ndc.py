@@ -1,12 +1,3 @@
-"""
-Nexus Download Collection (NDC) - Python Script
-================================================
-Sends every mod in a NexusMods collection to Vortex using pre-keyed NXM
-links so you never see the Premium dialog.
-
-Run: double-click "Run NDC.bat"  OR  python ndc.py
-"""
-
 import ctypes
 import json
 import os
@@ -25,12 +16,6 @@ except ImportError:
     _HAS_MSVCRT = False
 
 def _open_url(url):
-    """
-    Open a URL/protocol link silently on Windows using CREATE_NO_WINDOW.
-    This launches Vortex fully detached from our console so its debug
-    output never bleeds into our terminal. Falls back to webbrowser on
-    non-Windows.
-    """
     if os.name == "nt":
         try:
             import subprocess
@@ -82,7 +67,6 @@ import browser_cookie3
 from curl_cffi import requests as cffi_requests
 
 class SessionExpiredError(Exception):
-    """Raised when NexusMods returns 403 mid-download — triggers live cookie repaste."""
     pass
 
 # ── Hotkey control flags ────────────────────────────────────────────────────
@@ -91,7 +75,6 @@ _pause_flag = threading.Event()   # P = pause/resume
 _cancel_watcher = threading.Event()  # Cancels background watcher thread
 
 def _hotkey_listener():
-    """Background thread: Q to stop, P to pause/resume. Uses msvcrt (Windows only)."""
     if not _HAS_MSVCRT:
         return
     while not _stop_flag.is_set():
@@ -113,10 +96,6 @@ def _hotkey_listener():
         time.sleep(0.05)
 
 def _tick_sleep(seconds):
-    """
-    Sleep in 100ms ticks so stop/pause flags are checked frequently.
-    Does NOT raise KeyboardInterrupt — clean exit only via Q/P keys.
-    """
     end = time.monotonic() + seconds
     while time.monotonic() < end:
         if _stop_flag.is_set():
@@ -127,7 +106,6 @@ def _tick_sleep(seconds):
 
 # ── Thread-shielded curl_cffi wrappers ─────────────────────────────────────
 def _cffi_get(url, **kwargs):
-    """Run a curl_cffi GET in a daemon thread, shielded from KeyboardInterrupt."""
     result, exc = [None], [None]
     def _run():
         try:
@@ -142,7 +120,6 @@ def _cffi_get(url, **kwargs):
     return result[0]
 
 def _cffi_post(url, **kwargs):
-    """Run a curl_cffi POST in a daemon thread, shielded from KeyboardInterrupt."""
     result, exc = [None], [None]
     def _run():
         try:
@@ -184,7 +161,6 @@ def convert_size(kb):
     return f"{gb:.2f} GB" if gb >= 1 else f"{mb:.2f} MB"
 
 def _progress_bar(sent, total, total_kb):
-    """Print a compact progress bar: ████░░░░ 21/58 (36%)  104.3 MB sent"""
     bar_w   = 28
     pct     = sent / total if total else 0
     filled  = round(bar_w * pct)
@@ -369,7 +345,6 @@ def _jar_from_string(cookie_str):
     return jar
 
 def _to_requests_jar(jar):
-    """Convert any http.cookiejar.CookieJar → RequestsCookieJar (which supports .set())."""
     if isinstance(jar, requests.cookies.RequestsCookieJar):
         return jar
     rjar = requests.cookies.RequestsCookieJar()
@@ -378,18 +353,11 @@ def _to_requests_jar(jar):
     return rjar
 
 def _is_valid_session(jar):
-    """Require a real NexusMods login cookie. 'sid' is set for ALL visitors so excluded."""
     _LOGIN_COOKIES = {"nexusmods_session", "nexusmods_session_refresh", "member_id"}
     names = {c.name for c in jar}
     return bool(names & _LOGIN_COOKIES)
 
 def _check_cookie_freshness(cookie_str):
-    """
-    Parse the cf_clearance value to estimate how old it is.
-    cf_clearance format: TOKEN-ISSUED_UNIX_TS-VERSION-...
-    cf_clearance is valid for ~1 hour from issuance.
-    Returns (ok: bool, message: str)
-    """
     if not cookie_str:
         return True, ""
     m = re.search(r'cf_clearance=([^;]+)', cookie_str)
@@ -409,11 +377,6 @@ def _check_cookie_freshness(cookie_str):
     return True, ""
 
 def _verify_session_live(jar):
-    """
-    Confirm the session is actually logged in by hitting /users/myaccount.
-    NexusMods returns 200 if logged in, 302 redirect to /login if not.
-    No fallback — a network error means we cannot confirm, so we return False.
-    """
     try:
         cookies = {c.name: c.value for c in jar}
         r = _cffi_get(
@@ -430,10 +393,6 @@ def _verify_session_live(jar):
         return False
 
 def _try_browser_cookies():
-    """
-    Silently check supported browsers for active NexusMods session cookies.
-    Returns (name, jar) for the first valid session found, or (None, None).
-    """
     for name, loader in _BROWSERS:
         try:
             jar = loader(domain_name=".nexusmods.com")
@@ -557,16 +516,6 @@ _NXM_PATTERNS = [
 ]
 
 def fetch_keyed_nxm(mod, jar):
-    """
-    3-step approach that mirrors the original userscript:
-      1. Fetch the mod download page HTML with &nmm=1 and scrape for a
-         pre-keyed NXM/CDN URL using the same regex patterns as the JS.
-      2. Fall back to GenerateDownloadUrl API with nmm=1.
-      3. Fall back to GenerateDownloadUrl API without nmm.
-
-    A keyed NXM link (nxm://...?key=X&expires=Y) lets Vortex download
-    directly without showing the Premium dialog.
-    """
     fid     = mod["fileId"]
     game_id = mod["file"]["mod"]["game"]["id"]
     ref_url = mod["file"]["url"]
@@ -655,10 +604,6 @@ def fetch_keyed_nxm(mod, jar):
 NEXUS_API = "https://api.nexusmods.com/v1"
 
 def fetch_download_link(mod, api_key):
-    """
-    Get a download link via the NexusMods REST API.
-    Returns an nxm:// link (for Vortex) or a CDN URL.
-    """
     file_id = mod["fileId"]
     mod_id  = mod["file"]["mod"]["modId"]
     domain  = mod["file"]["mod"]["game"]["domainName"]
@@ -946,7 +891,6 @@ def download_mods(mods, game, slug, kind, cfg, revision=None):
 
 # ── Settings ───────────────────────────────────────────────────────────────
 def _s_row(num, label, value, value_col, desc=""):
-    """Print one settings row with consistent alignment."""
     num_s   = col(f" {num} ", "bold")
     label_s = f"{label:<22}"
     val_s   = col(value, value_col)
@@ -1035,10 +979,6 @@ def settings_menu(cfg):
 
 # ── Verify downloads ───────────────────────────────────────────────────────
 def _resolve_dl_dir(game, cfg):
-    """
-    Finds the actual downloads folder for a specific game, handling custom paths
-    and auto-detection, and appending the game subfolder if needed.
-    """
     custom_dl = cfg.get("vortex_dl_path", "").strip()
     if custom_dl:
         path = Path(custom_dl)
@@ -1057,11 +997,6 @@ def _resolve_dl_dir(game, cfg):
     return path
 
 def _scan_downloaded_mod_ids(dl_dir):
-    """
-    Scan dl_dir for mod files and extract mod IDs from Vortex filenames.
-    Vortex format: {Name}-{modId}-{major}-{minor}-{timestamp}.{ext}
-    Returns a set of mod ID integers found on disk.
-    """
     found_ids = set()
     if dl_dir is None or not dl_dir.exists():
         return found_ids
@@ -1077,10 +1012,6 @@ def _scan_downloaded_mod_ids(dl_dir):
     return found_ids
 
 def verify_downloads(mods, game, cfg):
-    """
-    Cross-reference the collection mod list against files already in
-    Vortex's download folder. Prints a full ✓ / ✗ status report.
-    """
     os.system("cls" if os.name == "nt" else "clear")
     dl_dir = _resolve_dl_dir(game, cfg)
 
