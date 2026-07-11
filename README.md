@@ -1,54 +1,29 @@
-# Nexus Download Collection (NDC) — Python CLI
+# Nexus Download Collection (NDC)
 
-An automated downloader for NexusMods collections. This tool provides a workaround for **non-Premium users** to download entire collections directly within Vortex without clicking "slow download" for every single mod.
+A Python CLI tool to automate downloading NexusMods collections for non-premium users. Instead of clicking the "slow download" button in your browser for 50+ mods individually, this script grabs the direct links using your browser session cookies and sends them straight to Vortex so it can download them in the background.
 
----
-
-## 🚀 How to Run
-
-Simply double-click **`Run NDC.bat`** (or run `python ndc.py` in your terminal).
+It features a clean, full-screen console UI (using the `rich` library) that tracks progress without cluttering your terminal.
 
 ---
 
-## ⚙️ Download Modes
-
-On first run (or if `ndc_config.json` is deleted), the tool will guide you through a quick setup to set your **API Key**, **Cookie String**, and **Mode**:
-
-### 1. Cookie Mode (Recommended for Non-Premium)
-* **How it works:** Uses your browser session cookies to scrape keyed NXM download links, bypassing the "Premium Required" prompt.
-* **Flow:** Triggers Windows to send these keyed NXM links directly to **Vortex**. Vortex then downloads the files internally in the background without prompting you.
-* **Note:** No Chrome/browser download settings need to be modified. Everything is handled directly by Vortex.
-
-### 2. API Mode
-* **How it works:** Generates standard `nxm://` collection download links using your Nexus API key.
-* **Flow:** Sends links straight to your Vortex mod manager.
-* **Note:** Non-Premium users will see the "Premium Required" slow download webpage inside Vortex for every mod in this mode.
+## How to Run
+Just double-click `Run NDC.bat`. It will automatically check if you have Python/pip, install the required packages (`curl_cffi`, `rich`, `browser_cookie3`), and start the application.
 
 ---
 
-## 🛠️ Step-by-Step Guide for Cookie Mode
-
-To download mods automatically directly inside Vortex:
-
-### Step 1: Cancel Ongoing Vortex Installs
-If Vortex is currently prompting you with download dialogs, click **Cancel** on the install process inside Vortex.
-
-### Step 2: Run the Script
-1. Run **`Run NDC.bat`**.
-2. Select **Option 1 (Download a collection)**.
-3. Paste the NexusMods Collection URL.
-4. Select which mods to download (All, Mandatory, or Optional).
-5. The script will automatically trigger Vortex to download the files one-by-one.
-
-### Step 3: Install in Vortex
-1. Once Vortex finishes downloading the files, go to the **Downloads** tab on the left sidebar.
-2. Click **Install All**!
+## How to Use (Cookie Mode)
+1. Log into your NexusMods account in your web browser (Brave, Firefox, Chrome, etc.).
+2. Run `Run NDC.bat` and choose option 1 to download a collection.
+3. Paste the collection URL.
+4. The script will auto-detect your browser session and check which mods are already downloaded to save time.
+5. Select "Download MISSING only". The CLI will trigger Vortex to fetch each mod.
+6. Once the list completes, the script will automatically open the collection installer inside Vortex so you can finish setting it up.
 
 ---
 
-## ⚙️ Modifying Settings
-Run the script, select **Option 2 (Settings)** to:
-* Switch between **Cookie** and **API** modes.
-* Re-paste or update your API key / Cookie string.
-* Adjust the pause time between downloads (default: 5 seconds).
-* Adjust download speed limits.
+## Settings
+Choose option 2 from the main menu to customize:
+* **Download Mode**: Toggle between Cookie mode (free direct downloads) and API mode (requires a Premium account).
+* **Vortex DL Folder**: Set manually if the script fails to auto-detect your Vortex download directory.
+* **Download Speed & Pause**: Fine-tune the wait intervals between files so you don't overwhelm Vortex.
+* **Cookie String**: If auto-detection fails (e.g. on Chrome 127+ due to App-Bound Encryption), you can paste your session cookie string here manually.
