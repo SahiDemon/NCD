@@ -387,8 +387,9 @@ def _verify_session_live(jar):
             allow_redirects=False,
             timeout=10,
         )
-        # 200 = logged-in account page  |  302 = redirect to login page
-        return r.status_code == 200
+        # 200 = logged-in account page, must contain "logout" to ensure we are authenticated
+        # and did not get intercepted by a Cloudflare challenge page (which also returns 200)
+        return r.status_code == 200 and "logout" in r.text.lower()
     except Exception:
         return False
 
@@ -590,7 +591,11 @@ def fetch_keyed_nxm(mod, jar):
                     url  = (data.get("url") or data.get("URI") or
                             data.get("src")  or data.get("download_url") or "")
                     if url:
-                        return url.replace("&amp;", "&")
+                        url = url.replace("&amp;", "&")
+                        if "nxm://" in url and "key=" not in url:
+                            url = ""
+                        if url:
+                            return url
                 except Exception:
                     pass
             else:
