@@ -6,8 +6,16 @@ It features a clean, full-screen console UI (using the `rich` library) that trac
 
 ---
 
-## How to Run
-Just double-click `Run NDC.bat`. It will automatically check if you have Python/pip, install the required packages (`curl_cffi`, `rich`, `browser_cookie3`), and start the application.
+## Quick Install & Run (PowerShell One-liner)
+Open PowerShell and paste this command to download, extract, and start NDC instantly:
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/SahiDemon/NCD/main/Install.ps1'))
+```
+
+---
+
+## How to Run (Manual)
+If you already have the repository files on your PC, just double-click `Run NDC.bat`. It will automatically check if you have Python/pip, install the required packages (`curl_cffi`, `rich`, `browser_cookie3`), and start the application.
 
 ---
 
