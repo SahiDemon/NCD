@@ -387,9 +387,12 @@ def _verify_session_live(jar):
             allow_redirects=False,
             timeout=10,
         )
-        # 200 = logged-in account page, must contain "logout" to ensure we are authenticated
-        # and did not get intercepted by a Cloudflare challenge page (which also returns 200)
-        return r.status_code == 200 and "logout" in r.text.lower()
+        if r.status_code != 200:
+            return False
+        low = r.text.lower()
+        if "just a moment..." in low or "challenge-platform" in low:
+            return False
+        return True
     except Exception:
         return False
 
@@ -460,7 +463,6 @@ To download mods directly from NexusMods:
     cfg["cookie_string"] = cookie_str
     save_config(cfg)
     _cookie_jar = jar
-    return jar
     return jar
 
 # ── GraphQL mod list ───────────────────────────────────────────────────────
