@@ -1217,17 +1217,24 @@ def main():
         # ── Step 3: Cookie capture (only for cookie mode) ──────────────────
         if cfg["mode"] == "cookie":
             os.system("cls" if os.name == "nt" else "clear")
+            browser_name, jar = None, None
             if _HAS_RICH:
                 c = Console()
                 c.print(Panel(
                     "[bold white]Step 3 of 3 — NexusMods Session Cookies[/bold white]\n\n"
-                    "Trying to auto-detect your browser session...",
+                    "Initiating browser session scanner...",
                     border_style="cyan", padding=(1, 2)
                 ))
+                with c.status("[bold cyan]Preparing scanner...[/bold cyan]", spinner="dots12") as status:
+                    time.sleep(0.4)
+                    for name, _ in _BROWSERS:
+                        status.update(f"[bold cyan]Scanning {name} session...[/bold cyan]")
+                        time.sleep(0.15)
+                    status.update("[bold cyan]Verifying active session...[/bold cyan]")
+                    browser_name, jar = _try_browser_cookies()
             else:
                 print(col("\n  Step 3: Detecting browser cookies...", "cyan"))
-
-            browser_name, jar = _try_browser_cookies()
+                browser_name, jar = _try_browser_cookies()
             if jar is not None:
                 cfg["cookie_string"] = "; ".join(f"{ck.name}={ck.value}" for ck in jar)
                 if _HAS_RICH:
