@@ -1161,24 +1161,30 @@ def main():
         else:
             print(col("\n  ★ First-Time Setup ★\n", "cyan"))
 
-        # ── Step 1: Mode selection (FIRST — most important choice) ─────────
+        # ── Step 1: Mode selection ─────────────────────────────────────────
         if _HAS_RICH:
             c = Console()
             mode_table = Table(box=box.ROUNDED, expand=True, border_style="cyan",
-                               title="[bold white]Step 1 of 3 — Are you a NexusMods Premium user?[/bold white]")
+                               title="[bold white]Step 1 of 3 — Select Download Mode[/bold white]")
             mode_table.add_column("#", justify="center", width=4, style="bold yellow")
-            mode_table.add_column("Mode", style="bold white", width=20)
-            mode_table.add_column("Who is this for?", style="dim white")
-            mode_table.add_row("1", "[bold green]Cookie Mode  ★  (Free)[/bold green]",
-                               "No Premium needed — uses your browser login to download directly")
-            mode_table.add_row("2", "API Mode  (Premium)",
-                               "Requires a NexusMods Premium subscription")
+            mode_table.add_column("Mode", style="bold white", width=28)
+            mode_table.add_column("Details", style="dim white")
+            mode_table.add_row(
+                "1",
+                "[bold green]Cookie Mode  ★  (Recommended)[/bold green]",
+                "Free — no Premium needed. Uses your browser login session."
+            )
+            mode_table.add_row(
+                "2",
+                "API Mode",
+                "Requires NexusMods Premium for direct downloads."
+            )
             c.print(Panel(mode_table, subtitle="[bold cyan]★ NDC by SahiDemon ★[/bold cyan]",
                           border_style="cyan", padding=(1, 2)))
         else:
-            print(col("\n  Step 1: Are you a Premium user?\n"
-                      "  1. No  — Cookie Mode (free, recommended)\n"
-                      "  2. Yes — API Mode", "bold"))
+            print(col("\n  Step 1: Select Download Mode\n"
+                      "  1. Cookie Mode  (Recommended — free, no Premium needed)\n"
+                      "  2. API Mode     (Requires Premium)", "bold"))
 
         mode_ch = input(col("  Choice [1/2, default=1] › ", "bold")).strip()
         cfg["mode"] = "api" if mode_ch == "2" else "cookie"
