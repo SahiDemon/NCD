@@ -18,14 +18,7 @@ except ImportError:
 def _open_url(url):
     if os.name == "nt":
         try:
-            import subprocess
-            subprocess.Popen(
-                ["cmd.exe", "/c", "start", "", url],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                stdin=subprocess.DEVNULL,
-                creationflags=0x08000000,  # CREATE_NO_WINDOW
-            )
+            os.startfile(url)
         except Exception:
             ctypes.windll.shell32.ShellExecuteW(None, "open", url, None, None, 0)
     else:
