@@ -1145,22 +1145,115 @@ def main():
     cfg = load_config()
 
     if is_new_user or not cfg.get("api_key"):
-        print(col("─" * 60, "dim"))
-        print(col("  First-Time Setup", "bold"))
-        print(col("─" * 60, "dim"))
+        os.system("cls" if os.name == "nt" else "clear")
 
-        # API Key (required to fetch collection mod lists)
-        if not cfg.get("api_key"):
-            print(col("\n  NexusMods API Key", "bold"))
-            print("     Get one at: https://www.nexusmods.com/users/myaccount?tab=api")
-            cfg["api_key"] = input("     Paste API Key: ").strip()
+        if _HAS_RICH:
+            c = Console()
+            c.print(Panel(
+                "[bold cyan]Welcome to NDC![/bold cyan]\n\n"
+                "This is a one-time setup. We'll get you configured in under a minute.\n"
+                "You can change any of these later in [bold white]Settings[/bold white].",
+                title="[bold cyan]First-Time Setup[/bold cyan]",
+                subtitle="[bold cyan]★ NDC by SahiDemon ★[/bold cyan]",
+                border_style="cyan", padding=(1, 2)
+            ))
+        else:
+            print(col("\n  ★ First-Time Setup ★\n", "cyan"))
 
-        # Default to cookie mode — auto-detection runs when you start a download
-        if not cfg.get("mode") or is_new_user:
-            cfg["mode"] = "cookie"
+        # ── Step 1: API Key ────────────────────────────────────────────────
+        if _HAS_RICH:
+            c.print(Panel(
+                "[bold white]Step 1 of 3 — NexusMods API Key[/bold white]\n\n"
+                "Required to fetch the list of mods in any collection.\n"
+                "Get yours at: [bold cyan]nexusmods.com/users/myaccount?tab=api[/bold cyan]",
+                border_style="yellow", padding=(1, 2)
+            ))
+        else:
+            print(col("  Step 1: API Key", "yellow"))
+            print("  Get one at: nexusmods.com/users/myaccount?tab=api")
+
+        cfg["api_key"] = input(col("  Paste API Key › ", "bold")).strip()
+
+        # ── Step 2: Mode selection ─────────────────────────────────────────
+        os.system("cls" if os.name == "nt" else "clear")
+        if _HAS_RICH:
+            c = Console()
+            mode_table = Table(box=box.ROUNDED, expand=True, border_style="cyan", title="[bold white]Step 2 of 3 — Download Mode[/bold white]")
+            mode_table.add_column("#", justify="center", width=4, style="bold yellow")
+            mode_table.add_column("Mode", style="bold white", width=18)
+            mode_table.add_column("How it works", style="dim white")
+            mode_table.add_row("1", "Cookie Mode  ★", "Uses your browser login session — works without Premium")
+            mode_table.add_row("2", "API Mode", "Uses the official API — requires a Premium account for direct downloads")
+            c.print(Panel(mode_table, subtitle="[bold cyan]★ NDC by SahiDemon ★[/bold cyan]", border_style="cyan", padding=(1, 2)))
+        else:
+            print(col("\n  Step 2: Download Mode\n  1. Cookie Mode (recommended — no Premium needed)\n  2. API Mode (requires Premium)", "bold"))
+
+        mode_ch = input(col("  Choice [1/2, default=1] › ", "bold")).strip()
+        cfg["mode"] = "api" if mode_ch == "2" else "cookie"
+
+        # ── Step 3: Cookie capture (only for cookie mode) ──────────────────
+        if cfg["mode"] == "cookie":
+            os.system("cls" if os.name == "nt" else "clear")
+            if _HAS_RICH:
+                c = Console()
+                c.print(Panel(
+                    "[bold white]Step 3 of 3 — NexusMods Session Cookies[/bold white]\n\n"
+                    "Trying to auto-detect your browser session...",
+                    border_style="cyan", padding=(1, 2)
+                ))
+            else:
+                print(col("\n  Step 3: Detecting browser cookies...", "cyan"))
+
+            browser_name, jar = _try_browser_cookies()
+            if jar is not None:
+                cfg["cookie_string"] = "; ".join(f"{c.name}={c.value}" for c in jar)
+                if _HAS_RICH:
+                    Console().print(Panel(
+                        f"[bold green]✓ Session found via {browser_name}![/bold green]\n\n"
+                        "Your cookies have been saved automatically.\n"
+                        "You won't need to paste anything manually.",
+                        border_style="green", padding=(1, 2)
+                    ))
+                else:
+                    print(col(f"  ✓ Session detected from {browser_name}!", "green"))
+                time.sleep(2)
+            else:
+                if _HAS_RICH:
+                    Console().print(Panel(
+                        "[bold yellow]⚠ Could not auto-detect a browser session[/bold yellow]\n\n"
+                        "To get your Cookie string:\n"
+                        "  1. Log into [bold cyan]nexusmods.com[/bold cyan] in your browser\n"
+                        "  2. Press [bold white]F12[/bold white] → Network tab → press [bold white]F5[/bold white]\n"
+                        "  3. Click any request → copy the [bold white]Cookie[/bold white] request header\n\n"
+                        "[dim]You can also skip this and paste it later in Settings → 3[/dim]",
+                        title="[bold yellow]Manual Cookie Entry[/bold yellow]",
+                        border_style="yellow", padding=(1, 2)
+                    ))
+                else:
+                    print(col("\n  ⚠ Auto-detect failed. Paste your NexusMods cookie string:", "yellow"))
+
+                cookie_str = input(col("  Paste Cookie (or press Enter to skip) › ", "bold")).strip()
+                if cookie_str:
+                    cfg["cookie_string"] = cookie_str
+        else:
+            cfg["cookie_string"] = ""
 
         save_config(cfg)
-        print(col("\n  ✓ Setup done! Cookies will be auto-detected when you start a download.\n", "green"))
+        os.system("cls" if os.name == "nt" else "clear")
+        if _HAS_RICH:
+            Console().print(Panel(
+                "[bold green]✓ Setup Complete![/bold green]\n\n"
+                f"Mode:  [bold white]{'Cookie (free downloads)' if cfg['mode'] == 'cookie' else 'API (Premium)'}[/bold white]\n"
+                f"Cookies: [bold white]{'Saved ✓' if cfg.get('cookie_string') else 'Not set (can add in Settings)'}[/bold white]\n\n"
+                "You're ready to start downloading collections!",
+                title="[bold cyan]All Done[/bold cyan]",
+                subtitle="[bold cyan]★ NDC by SahiDemon ★[/bold cyan]",
+                border_style="green", padding=(1, 2)
+            ))
+        else:
+            print(col("  ✓ Setup done!\n", "green"))
+        time.sleep(2)
+
 
     while True:
         os.system("cls" if os.name == "nt" else "clear")
