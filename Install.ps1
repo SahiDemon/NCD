@@ -7,17 +7,13 @@ $ErrorActionPreference = 'Stop'
 function Write-Banner {
     Clear-Host
     Write-Host ""
-    Write-Host "  ███╗   ██╗██████╗  ██████╗ " -ForegroundColor Cyan
-    Write-Host "  ████╗  ██║██╔══██╗██╔════╝ " -ForegroundColor Cyan
-    Write-Host "  ██╔██╗ ██║██║  ██║██║      " -ForegroundColor Cyan
-    Write-Host "  ██║╚██╗██║██║  ██║██║      " -ForegroundColor Cyan
-    Write-Host "  ██║ ╚████║██████╔╝╚██████╗ " -ForegroundColor Cyan
-    Write-Host "  ╚═╝  ╚═══╝╚═════╝  ╚═════╝ " -ForegroundColor Cyan
-    Write-Host ""
+    Write-Host "  =========================================" -ForegroundColor Cyan
+    Write-Host "         N E X U S   M O D S   N D C" -ForegroundColor Cyan
+    Write-Host "  =========================================" -ForegroundColor Cyan
     Write-Host "  Nexus Download Collection  —  Installer" -ForegroundColor White
     Write-Host "  by SahiDemon" -ForegroundColor DarkCyan
     Write-Host ""
-    Write-Host "  ──────────────────────────────────────────────" -ForegroundColor DarkGray
+    Write-Host "  -----------------------------------------" -ForegroundColor DarkGray
     Write-Host ""
 }
 
@@ -96,8 +92,7 @@ Write-Step 3 "Launching NDC"
 Write-Host ""
 Write-Host "  NDC is ready! The first-time setup will run inside the app." -ForegroundColor White
 Write-Host "  (asking for your mode choice, API key, and cookies if needed)" -ForegroundColor DarkGray
-Write-Host ""
-Write-Host "  ──────────────────────────────────────────────" -ForegroundColor DarkGray
+Write-Host "  -----------------------------------------" -ForegroundColor DarkGray
 Write-Host ""
 
 Start-Sleep -Seconds 1
