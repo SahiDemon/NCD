@@ -395,7 +395,7 @@ def _verify_session_live(jar):
 def _try_browser_cookies():
     for name, loader in _BROWSERS:
         try:
-            jar = loader(domain_name=".nexusmods.com")
+            jar = loader(domain_name="nexusmods.com")
             if not {c.name: c.value for c in jar} or not _is_valid_session(jar):
                 continue
             jar = _to_requests_jar(jar)
