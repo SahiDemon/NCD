@@ -1147,6 +1147,7 @@ def main():
     if is_new_user or not cfg.get("api_key"):
         os.system("cls" if os.name == "nt" else "clear")
 
+        # ── Welcome ────────────────────────────────────────────────────────
         if _HAS_RICH:
             c = Console()
             c.print(Panel(
@@ -1160,36 +1161,43 @@ def main():
         else:
             print(col("\n  ★ First-Time Setup ★\n", "cyan"))
 
-        # ── Step 1: API Key ────────────────────────────────────────────────
+        # ── Step 1: Mode selection (FIRST — most important choice) ─────────
         if _HAS_RICH:
+            c = Console()
+            mode_table = Table(box=box.ROUNDED, expand=True, border_style="cyan",
+                               title="[bold white]Step 1 of 3 — Are you a NexusMods Premium user?[/bold white]")
+            mode_table.add_column("#", justify="center", width=4, style="bold yellow")
+            mode_table.add_column("Mode", style="bold white", width=20)
+            mode_table.add_column("Who is this for?", style="dim white")
+            mode_table.add_row("1", "[bold green]Cookie Mode  ★  (Free)[/bold green]",
+                               "No Premium needed — uses your browser login to download directly")
+            mode_table.add_row("2", "API Mode  (Premium)",
+                               "Requires a NexusMods Premium subscription")
+            c.print(Panel(mode_table, subtitle="[bold cyan]★ NDC by SahiDemon ★[/bold cyan]",
+                          border_style="cyan", padding=(1, 2)))
+        else:
+            print(col("\n  Step 1: Are you a Premium user?\n"
+                      "  1. No  — Cookie Mode (free, recommended)\n"
+                      "  2. Yes — API Mode", "bold"))
+
+        mode_ch = input(col("  Choice [1/2, default=1] › ", "bold")).strip()
+        cfg["mode"] = "api" if mode_ch == "2" else "cookie"
+
+        # ── Step 2: API Key ────────────────────────────────────────────────
+        os.system("cls" if os.name == "nt" else "clear")
+        if _HAS_RICH:
+            c = Console()
             c.print(Panel(
-                "[bold white]Step 1 of 3 — NexusMods API Key[/bold white]\n\n"
-                "Required to fetch the list of mods in any collection.\n"
+                "[bold white]Step 2 of 3 — NexusMods API Key[/bold white]\n\n"
+                "Required by both modes to fetch the mod list for any collection.\n"
                 "Get yours at: [bold cyan]nexusmods.com/users/myaccount?tab=api[/bold cyan]",
                 border_style="yellow", padding=(1, 2)
             ))
         else:
-            print(col("  Step 1: API Key", "yellow"))
+            print(col("  Step 2: API Key", "yellow"))
             print("  Get one at: nexusmods.com/users/myaccount?tab=api")
 
         cfg["api_key"] = input(col("  Paste API Key › ", "bold")).strip()
-
-        # ── Step 2: Mode selection ─────────────────────────────────────────
-        os.system("cls" if os.name == "nt" else "clear")
-        if _HAS_RICH:
-            c = Console()
-            mode_table = Table(box=box.ROUNDED, expand=True, border_style="cyan", title="[bold white]Step 2 of 3 — Download Mode[/bold white]")
-            mode_table.add_column("#", justify="center", width=4, style="bold yellow")
-            mode_table.add_column("Mode", style="bold white", width=18)
-            mode_table.add_column("How it works", style="dim white")
-            mode_table.add_row("1", "Cookie Mode  ★", "Uses your browser login session — works without Premium")
-            mode_table.add_row("2", "API Mode", "Uses the official API — requires a Premium account for direct downloads")
-            c.print(Panel(mode_table, subtitle="[bold cyan]★ NDC by SahiDemon ★[/bold cyan]", border_style="cyan", padding=(1, 2)))
-        else:
-            print(col("\n  Step 2: Download Mode\n  1. Cookie Mode (recommended — no Premium needed)\n  2. API Mode (requires Premium)", "bold"))
-
-        mode_ch = input(col("  Choice [1/2, default=1] › ", "bold")).strip()
-        cfg["mode"] = "api" if mode_ch == "2" else "cookie"
 
         # ── Step 3: Cookie capture (only for cookie mode) ──────────────────
         if cfg["mode"] == "cookie":
@@ -1206,7 +1214,7 @@ def main():
 
             browser_name, jar = _try_browser_cookies()
             if jar is not None:
-                cfg["cookie_string"] = "; ".join(f"{c.name}={c.value}" for c in jar)
+                cfg["cookie_string"] = "; ".join(f"{ck.name}={ck.value}" for ck in jar)
                 if _HAS_RICH:
                     Console().print(Panel(
                         f"[bold green]✓ Session found via {browser_name}![/bold green]\n\n"
@@ -1225,7 +1233,7 @@ def main():
                         "  1. Log into [bold cyan]nexusmods.com[/bold cyan] in your browser\n"
                         "  2. Press [bold white]F12[/bold white] → Network tab → press [bold white]F5[/bold white]\n"
                         "  3. Click any request → copy the [bold white]Cookie[/bold white] request header\n\n"
-                        "[dim]You can also skip this and paste it later in Settings → 3[/dim]",
+                        "[dim]You can skip this and paste it later in Settings → 3[/dim]",
                         title="[bold yellow]Manual Cookie Entry[/bold yellow]",
                         border_style="yellow", padding=(1, 2)
                     ))
@@ -1243,9 +1251,9 @@ def main():
         if _HAS_RICH:
             Console().print(Panel(
                 "[bold green]✓ Setup Complete![/bold green]\n\n"
-                f"Mode:  [bold white]{'Cookie (free downloads)' if cfg['mode'] == 'cookie' else 'API (Premium)'}[/bold white]\n"
-                f"Cookies: [bold white]{'Saved ✓' if cfg.get('cookie_string') else 'Not set (can add in Settings)'}[/bold white]\n\n"
-                "You're ready to start downloading collections!",
+                f"Mode:    [bold white]{'Cookie (free downloads)' if cfg['mode'] == 'cookie' else 'API (Premium)'}[/bold white]\n"
+                f"Cookies: [bold white]{'Saved ✓' if cfg.get('cookie_string') else 'Not set — add later in Settings → 3'}[/bold white]\n\n"
+                "You're all set! Start by choosing [bold cyan]1. Download a Collection[/bold cyan].",
                 title="[bold cyan]All Done[/bold cyan]",
                 subtitle="[bold cyan]★ NDC by SahiDemon ★[/bold cyan]",
                 border_style="green", padding=(1, 2)
