@@ -1190,20 +1190,29 @@ def main():
         cfg["mode"] = "api" if mode_ch == "2" else "cookie"
 
         # ── Step 2: API Key ────────────────────────────────────────────────
-        os.system("cls" if os.name == "nt" else "clear")
-        if _HAS_RICH:
-            c = Console()
-            c.print(Panel(
-                "[bold white]Step 2 of 3 — NexusMods API Key[/bold white]\n\n"
-                "Required by both modes to fetch the mod list for any collection.\n"
-                "Get yours at: [bold cyan]nexusmods.com/users/myaccount?tab=api[/bold cyan]",
-                border_style="yellow", padding=(1, 2)
-            ))
-        else:
-            print(col("  Step 2: API Key", "yellow"))
-            print("  Get one at: nexusmods.com/users/myaccount?tab=api")
+        while True:
+            os.system("cls" if os.name == "nt" else "clear")
+            if _HAS_RICH:
+                c = Console()
+                c.print(Panel(
+                    "[bold white]Step 2 of 3 — NexusMods API Key[/bold white]\n\n"
+                    "Required by both modes to fetch the mod list for any collection.\n"
+                    "Get yours at: [bold cyan]nexusmods.com/users/myaccount?tab=api[/bold cyan]\n\n"
+                    "[bold yellow]★ Press Enter without typing to automatically open this link in your browser ★[/bold yellow]",
+                    border_style="yellow", padding=(1, 2)
+                ))
+            else:
+                print(col("  Step 2: API Key", "yellow"))
+                print("  Get one at: nexusmods.com/users/myaccount?tab=api")
+                print("  Press Enter on empty input to open the link.")
 
-        cfg["api_key"] = input(col("  Paste API Key › ", "bold")).strip()
+            api_key = input(col("  Paste API Key (or press Enter to open link) › ", "bold")).strip()
+            if not api_key:
+                _open_url("https://www.nexusmods.com/users/myaccount?tab=api")
+                time.sleep(1)
+                continue
+            cfg["api_key"] = api_key
+            break
 
         # ── Step 3: Cookie capture (only for cookie mode) ──────────────────
         if cfg["mode"] == "cookie":
