@@ -564,9 +564,11 @@ def fetch_keyed_nxm(mod, jar):
                         if "nxm://" in url and "key=" not in url:
                             break
                         return url
+        else:
+            if r.status_code == 403:
+                print(col("    [WARN] HTML scrape: 403 Forbidden. Your cookie session may have expired/invalidated.", "yellow"))
     except Exception as e:
         err = str(e)
-        # Suppress interrupt-caused curl noise
         if "curl: (23)" not in err and "KeyboardInterrupt" not in err:
             print(col(f"    [WARN] HTML scrape: {err}", "yellow"))
 
@@ -591,13 +593,15 @@ def fetch_keyed_nxm(mod, jar):
                         return url.replace("&amp;", "&")
                 except Exception:
                     pass
-            elif r.status_code == 403:
-                raise SessionExpiredError("403 from NexusMods — session expired mid-run")
+            else:
+                if r.status_code == 403:
+                    raise SessionExpiredError("403 from NexusMods — session expired or invalid")
         except Exception as e:
             err = str(e)
             if "curl: (23)" not in err and "KeyboardInterrupt" not in err:
                 print(col(f"    [WARN] API: {err}", "yellow"))
 
+    print(col("    [WARN] Failed to retrieve download key. Session cookies might be expired or invalid.", "yellow"))
     return ""
 
 # ── REST API Download Link (API Mode) ──────────────────────────────────────
@@ -619,6 +623,9 @@ def fetch_download_link(mod, api_key):
                 for lnk in links:
                     if "URI" in lnk:
                         return lnk["URI"]
+        elif resp.status_code == 403:
+            print(col("    [WARN] NexusMods API returned 403 (Forbidden). API Mode is only for Premium accounts!", "yellow"))
+            print(col("           Please switch to Cookie Mode in Settings -> 1.", "yellow"))
     except Exception as e:
         print(col(f"    [WARN] REST API error: {e}", "yellow"))
 
