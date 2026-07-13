@@ -432,16 +432,13 @@ def get_cookie_jar(cfg):
     # 2. Silently try saved cookie string
     if cfg.get("cookie_string"):
         jar = _jar_from_string(cfg["cookie_string"])
-        if _verify_session_live(jar):
+        if _is_valid_session(jar):
             if _HAS_RICH:
                 Console().print(Panel("[bold green]✓ Valid NexusMods Session Detected[/bold green] (Saved Cookie)", title="[bold cyan]Authentication Status[/bold cyan]", subtitle="[bold cyan]★ NDC by SahiDemon ★[/bold cyan]", border_style="green", padding=(0, 2)))
             else:
                 print(col("  ✓ Session detected (Saved Cookie)", "green"))
             _cookie_jar = jar
             return jar
-        else:
-            cfg["cookie_string"] = ""
-            save_config(cfg)
 
     # 3. Clean Boxed Prompt for Manual Cookie String
     if _HAS_RICH:
