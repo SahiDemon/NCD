@@ -690,7 +690,7 @@ def download_mods(mods, game, slug, kind, cfg, revision=None):
         for mod in mods:
             mid = mod["file"]["mod"]["modId"]
             fid = mod["fileId"]
-            if mid in disk_ids and fid not in done:
+            if (mid in disk_ids or fid in disk_ids) and fid not in done:
                 done.add(fid)
                 pre_skip += 1
         if pre_skip:
@@ -1017,11 +1017,9 @@ def _scan_downloaded_mod_ids(dl_dir):
     for f in dl_dir.iterdir():
         if f.suffix.lower() not in exts:
             continue
-        # First all-digit dash-segment of 3+ chars is the mod ID
         for part in f.stem.split("-"):
-            if part.isdigit() and len(part) >= 3:
+            if part.isdigit() and len(part) >= 1:
                 found_ids.add(int(part))
-                break
     return found_ids
 
 def verify_downloads(mods, game, cfg):
@@ -1042,10 +1040,11 @@ def verify_downloads(mods, game, cfg):
     ok, missing = [], []
     for mod in mods:
         mid  = mod["file"]["mod"]["modId"]
+        fid  = mod["fileId"]
         name = mod["file"]["name"]
         size = mod["file"].get("size") or 0
         url  = mod["file"]["url"]
-        if mid in found_ids:
+        if mid in found_ids or fid in found_ids:
             ok.append((name, size))
         else:
             missing.append((name, size, url))
