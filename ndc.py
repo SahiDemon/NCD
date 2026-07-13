@@ -18,7 +18,14 @@ except ImportError:
 def _open_url(url):
     if os.name == "nt":
         try:
-            os.startfile(url)
+            import subprocess
+            subprocess.Popen(
+                ["rundll32", "url.dll,FileProtocolHandler", url],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                stdin=subprocess.DEVNULL,
+                creationflags=0x08000000,  # CREATE_NO_WINDOW
+            )
         except Exception:
             ctypes.windll.shell32.ShellExecuteW(None, "open", url, None, None, 0)
     else:
@@ -815,25 +822,27 @@ def download_mods(mods, game, slug, kind, cfg, revision=None):
 
                 if idx < total and not _stop_flag.is_set():
                     smart = round(size / 1024 / speed_mbps) + pause_extra if (pause_extra > 0 and size > 0 and speed_mbps > 0) else pause_extra
-                    if smart > 0 and url and dl_dir:
-                        _cancel_watcher.clear()
-                        w_res = [False, 0.0]
-                        def _watcher_target(res=w_res):
-                            res[0], res[1] = _watch_vortex_download(dl_dir, name, size, smart + 30, state_dict=state_dict)
-                        watcher = threading.Thread(target=_watcher_target, daemon=True)
-                        watcher.start()
-                        end_t = time.monotonic() + smart
+                    if smart > 0 and url:
+                        if dl_dir:
+                            _cancel_watcher.clear()
+                            w_res = [False, 0.0]
+                            def _watcher_target(res=w_res):
+                                res[0], res[1] = _watch_vortex_download(dl_dir, name, size, smart + 30, state_dict=state_dict)
+                            watcher = threading.Thread(target=_watcher_target, daemon=True)
+                            watcher.start()
+                        end_t = time.monotonic() + max(smart, 3)
                         while time.monotonic() < end_t and not _stop_flag.is_set():
                             live.update(_render_dashboard(mods_list, idx-1, state_dict, sent_n, total, sent_kb))
                             time.sleep(0.2)
-                        _cancel_watcher.set()
-                        if not speed_tuned and w_res[0] and w_res[1] > 0.1 and size > 500:
-                            speed_mbps = round(w_res[1], 2)
-                            cfg["download_speed_mbps"] = speed_mbps
-                            save_config(cfg)
-                            speed_tuned = True
-                        if w_res[1] > 0:
-                            mods_list[idx-1]["speed"] = f"{w_res[1]:.1f} MB/s"
+                        if dl_dir:
+                            _cancel_watcher.set()
+                            if not speed_tuned and w_res[0] and w_res[1] > 0.1 and size > 500:
+                                speed_mbps = round(w_res[1], 2)
+                                cfg["download_speed_mbps"] = speed_mbps
+                                save_config(cfg)
+                                speed_tuned = True
+                            if w_res[1] > 0:
+                                mods_list[idx-1]["speed"] = f"{w_res[1]:.1f} MB/s"
 
                 mods_list[idx-1]["status"] = "DONE"
                 state_dict["active"] = False
